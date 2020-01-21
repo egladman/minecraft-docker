@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# The following MUST be passed in as environment variables.
+# - MC_SERVER_INSTANCE_DIR
+# - MC_SERVER_INSTANCE_PIPE
+
+if [ -z "${MC_SERVER_INSTANCE_DIR}" -o -z "${MC_SERVER_INSTANCE_PIPE}" ]; then
+    echo "MC_* environment variables not defined. Dying..."
+    exit 1
+fi
+
+MC_COMMAND="\${@}"
+if [ -z "\${MC_COMMAND}" ]; then
+    echo "argument required." && exit 1
+fi
+
+echo "${MC_COMMAND}" > "${MC_SERVER_INSTANCE_DIR}/${MC_SERVER_INSTANCE_PIPE}"

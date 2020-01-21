@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# The following MUST be passed in as environment variables.
+# - MC_USER
+# - MC_MIN_HEAP_SIZE
+# - MC_MAX_HEAP_SIZE
+# - MC_SERVER_INSTANCE_DIR
+# - MC_SERVER_INSTANCE_PIPE
+# - SYS_JAVA_PATH
+
+if [ -z "${MC_USER}" -o -z "${MC_MIN_HEAP_SIZE}" -o -z "${MC_MAX_HEAP_SIZE}" -o -z "${MC_SERVER_INSTANCE_DIR}" -o -z "${MC_SERVER_INSTANCE_PIPE}" ]; then
+    echo "MC_* environment variables not defined. Dying..."
+    exit 1
+fi
+
+if [ -z "${SYS_JAVA_PATH}" ]; then
+    echo "SYS_* environment variables not defined. Dying..."
+    exit 1
+fi
+
+MC_SERVER_INSTANCE_PIPE_PATH="${MC_SERVER_INSTANCE_DIR}/${MC_SERVER_INSTANCE_PIPE}"
+MC_SERVER_JAR="$(find minecraft_server*.jar -type f -print0)" # Since the .jar name can vary we must dynamically find it
+# TODO: Check if there is more than one .jar in the directory, if so gracefully fail. just to be safe...
+
+if [ -n "${1}" ]; then # Override jvm min heap size
+    MC_MIN_HEAP_SIZE="${1}"
+else
+    echo "MC_MIN_HEAP_SIZE override not defined. Using default: ${MC_MIN_HEAP_SIZE}"
+fi
+
+if [ -n "${2}" ]; then # Override jvm max heap size
+    MC_MAX_HEAP_SIZE="${2}"
+else
+    echo "MC_MAX_HEAP_SIZE override not defined. Using default: ${MC_MAX_HEAP_SIZE}"
+fi
+
+function _mkpipe() {
+    mkfifo "${1}" -m 777 || {
+        echo "Unable to create named pipe: ${1}"
+        exit 1
+    }
+}
+
+function _flushpipe() {
+    dd if="${1}" iflag=nonblock of=/dev/null
+}
+
+if [ ! -p "${MC_SERVER_INSTANCE_PIPE_PATH}" ]; then
+    _mkpipe "${MC_SERVER_INSTANCE_PIPE_PATH}"
+else # Pipe exists...
+    _flushpipe "${MC_SERVER_INSTANCE_PIPE_PATH}"
+fi
+
+pushd "${MC_SERVER_INSTANCE_DIR}/" > /dev/null
+tail -f "${MC_SERVER_INSTANCE_PIPE_PATH}" | ${SYS_JAVA_PATH} -Xms${MC_MIN_HEAP_SIZE} -Xmx${MC_MAX_HEAP_SIZE} -Djava.awt.headless=true -jar ${MC_SERVER_INSTANCE_DIR}/${MC_SERVER_JAR}
+popd > /dev/null

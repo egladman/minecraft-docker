@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# The following MUST be passed in as environment variables.
+# - MC_SERVER_INSTANCE_DIR
+
+if [ -z "${MC_SERVER_INSTANCE_DIR}" ]; then
+    echo "MC_* environment variables not defined. Dying..."
+    exit 1
+fi
+
+${MC_SERVER_INSTANCE_DIR}/bin/cmd "say Stopping instance in 15 seconds..."
+sleep 15s
+${MC_SERVER_INSTANCE_DIR}/bin/cmd "stop"

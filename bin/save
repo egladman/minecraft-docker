@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# The following MUST be passed in as environment variables.
+# - MC_SERVER_INSTANCE_DIR
+
+if [ -z "${MC_SERVER_INSTANCE_DIR}" ]; then
+    echo "MC_* environment variables not defined. Dying..."
+    exit 1
+fi
+
+${MC_SERVER_INSTANCE_DIR}/bin/cmd "say Saving instance. Server will momentarily become unresponsive."
+${MC_SERVER_INSTANCE_DIR}/bin/cmd "save-all flush" || {
+    echo "Failed to backup instance."
+    ${MC_SERVER_INSTANCE_DIR}/bin/cmd "say Failed to save instance."
+    exit 1
+}
