@@ -11,13 +11,7 @@ ENV SYS_JAVA_PATH /usr/bin/java
 
 # Using "--no-cache" instead of "apk update"
 # to keep the overall size of the image as small as possible
-
 RUN apk add --no-cache openjdk8-jre jq bash
-
-# ttf-dejavu
-# fontconfig seems like an odd dependency, however java throws a java.lang.NullPointerException if it's not present
-# see https://github.com/AdoptOpenJDK/openjdk-docker/issues/75
-
 
 # Create unprivileged user
 RUN addgroup -S "${MC_USER}"
