@@ -3,8 +3,7 @@ FROM alpine:latest
 # TODO: Move enviroment variable declaration to docker-compose.yml
 ENV MC_FORGE_VERSION 27.0.25
 ENV MC_USER minecraft
-ENV MC_MIN_HEAP_SIZE 1024M
-ENV MC_MAX_HEAP_SIZE 2048M
+ENV MC_JAVA_OPTIONS -XX:+UseContainerSupport -XX:InitialRAMPercentage=47.5 -XX:MaxRAMPercentage=95.0
 ENV MC_SERVER_INSTANCE_DIR /opt/minecraft
 ENV MC_SERVER_INSTANCE_PIPE minecraft.fifo
 ENV SYS_JAVA_PATH /usr/bin/java
